@@ -57,19 +57,21 @@ proc freq data=prj.cleaned order=data;
     tables mortality*sex weak_grip*sex smoke*sex high_ed*sex / chisq;
 run;
 
-/*Q1*/
+/* Unadjusted analysis using Kaplan-Meier curves and log-rank test */
 proc lifetest data=prj.cleaned plots=(s);
      time time*Mortality(0);
      strata weak_grip;
 run;
 
+/* Unadjusted cox proportional regression */
 proc phreg data=prj.cleaned; model time*Mortality(0) = weak_grip / rl; run;
 
+/* Adjusted cox proportional regression */
 proc phreg data=prj.cleaned;
      model time*Mortality(0) = weak_grip sex smoke high_ed Age_enrollment BMI gait_speed fev1 DSST/ rl;
 run;
 
-/*Q2*/
+/* Assess association between weak grip strength and other covariates */
 proc logistic data=prj.cleaned descending; model weak_grip = sex; run;
 proc logistic data=prj.cleaned descending; model weak_grip = smoke; run;
 proc logistic data=prj.cleaned descending; model weak_grip = high_ed; run;
@@ -83,7 +85,7 @@ proc freq data = prj.cleaned; tables weak_grip*sex / chisq; run;
 proc freq data = prj.cleaned; tables weak_grip*smoke / chisq; run;
 proc freq data = prj.cleaned; tables weak_grip*high_ed / chisq; run;
 
-/*Q3*/
+/* Assess association of weak grip strength with mortality between gender groups */
 proc phreg data=prj.cleaned;
     model time*Mortality(0) = weak_grip sex/ rl;
 run;
@@ -103,7 +105,7 @@ proc phreg data=female;
      model time*Mortality(0) = weak_grip smoke high_ed Age_enrollment BMI gait_speed fev1 DSST/ rl;
 run;
 
-/*Q4*/
+/* Assess potential confounders */
 proc phreg zph data=prj.cleaned;
     model time*Mortality(0) = weak_grip sex smoke high_ed Age_enrollment BMI gait_speed fev1 DSST/ rl;
 run;
